@@ -28,7 +28,7 @@ export interface FaceScanLog {
   scan_status: "SUCCESS" | "FAILED";
   confidence_score: number | null;
   date_created: string;
-  scan_type?: "CLOCK_IN" | "CLOCK_OUT" | "VERIFY";
+  scan_type?: "CLOCK_IN" | "CLOCK_OUT" | "LUNCH_START" | "LUNCH_END" | "VERIFY";
   user?: Employee;
 }
 
@@ -52,4 +52,4 @@ export type ScanStatus =
   | "success"
   | "error";
 
-export type ScanMode = "CLOCK_IN" | "CLOCK_OUT" | "VERIFY";
+export type ScanMode = "CLOCK_IN" | "CLOCK_OUT" | "LUNCH_START" | "LUNCH_END" | "VERIFY";

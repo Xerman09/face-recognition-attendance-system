@@ -1,4 +1,4 @@
-import { FaceBiometricRecord, FaceScanLog, Employee, AttendanceRecord } from "../types";
+import { FaceBiometricRecord, FaceScanLog, Employee, AttendanceRecord, ScanMode } from "../types";
 import { INITIAL_EMPLOYEES, INITIAL_SCAN_LOGS, INITIAL_ATTENDANCE } from "./mockData";
 
 const DIRECTUS_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
@@ -167,7 +167,7 @@ export async function logScanAttempt(
   userId: number | null,
   status: "SUCCESS" | "FAILED",
   confidenceScore: number | null,
-  scanType: "CLOCK_IN" | "CLOCK_OUT" | "VERIFY" = "CLOCK_IN"
+  scanType: ScanMode = "CLOCK_IN"
 ): Promise<FaceScanLog> {
   const logItem: FaceScanLog = {
     id: `log-${Date.now()}`,
