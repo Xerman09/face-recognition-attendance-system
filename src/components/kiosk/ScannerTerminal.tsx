@@ -418,11 +418,11 @@ export function ScannerTerminal({
   };
 
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-6">
-      {/* Left: Camera Feed & Biometric HUD */}
-      <div className="flex-1 glass-panel rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col relative">
+    <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
+      {/* Main Camera & Biometric Viewport */}
+      <div className="w-full rounded-[2.5rem] overflow-hidden border border-slate-800/80 shadow-2xl relative bg-slate-950/50 aspect-[3/4] sm:aspect-video flex items-center justify-center">
         {/* Terminal Video Viewport */}
-        <div className="relative aspect-[4/3] sm:aspect-video bg-black flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden bg-black">
           {/* Inactive State Prompt */}
           {!stream && (
             <div className="flex flex-col items-center justify-center p-8 text-center z-10">
@@ -517,107 +517,95 @@ export function ScannerTerminal({
           )}
         </div>
 
-        {/* Camera Footer Controls & Speed Optimization Bar */}
-        <div className="p-4 bg-slate-950/60 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* Speed Preset Selector */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
-              <Zap className="h-3.5 w-3.5 text-amber-400" /> Speed Profile:
-            </span>
-            <div className="flex items-center p-0.5 bg-slate-900 rounded-lg border border-slate-800 text-[11px]">
-              <button
-                onClick={() => setSpeedMode("TURBO")}
-                className={`px-2.5 py-1 rounded-md font-bold transition ${
-                  speedMode === "TURBO"
-                    ? "bg-emerald-500 text-slate-950 shadow-sm"
-                    : "text-slate-400 hover:text-white"
-                }`}
-                title="Instant Sub-Second Attendance Verification"
-              >
-                ⚡ Turbo (Sub-Second)
-              </button>
-              <button
-                onClick={() => setSpeedMode("BALANCED")}
-                className={`px-2.5 py-1 rounded-md font-semibold transition ${
-                  speedMode === "BALANCED"
-                    ? "bg-emerald-500 text-slate-950 shadow-sm"
-                    : "text-slate-400 hover:text-white"
-                }`}
-                title="Balanced Speed and 3-Frame Micro-Movement Verification"
-              >
-                Balanced
-              </button>
-              <button
-                onClick={() => setSpeedMode("STRICT")}
-                className={`px-2.5 py-1 rounded-md font-semibold transition ${
-                  speedMode === "STRICT"
-                    ? "bg-emerald-500 text-slate-950 shadow-sm"
-                    : "text-slate-400 hover:text-white"
-                }`}
-                title="Strict 4-Frame Liveness Verification"
-              >
-                Strict
-              </button>
-            </div>
-          </div>
-
-          {/* Model toggle and Deactivate */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setModelType(modelType === "tiny" ? "ssd" : "tiny")}
-              className="text-xs text-slate-400 hover:text-slate-200 font-mono transition"
-              title="Toggle between TinyFaceDetector (Ultra-Fast) and SSD MobileNet"
-            >
-              Engine: <span className="text-emerald-400 font-bold">{modelType.toUpperCase()}</span>
-            </button>
-
-            {stream && (
-              <button
-                onClick={stopCamera}
-                className="text-xs text-rose-400 hover:text-rose-300 transition font-medium"
-              >
-                Deactivate Camera
-              </button>
-            )}
+        {/* Overlay Result Sheet (Slides up like Apple Pay) */}
+        <div
+          className={`absolute bottom-0 left-0 w-full z-40 transition-all duration-500 ease-out p-4 sm:p-8 flex justify-center pointer-events-none ${
+            scanStatus === "success" || scanStatus === "error"
+              ? "translate-y-0 opacity-100"
+              : "translate-y-8 opacity-0"
+          }`}
+        >
+          <div className="w-full max-w-md pointer-events-auto">
+            {scanStatus === "success" || scanStatus === "error" ? (
+              <EmployeeCard
+                success={scanStatus === "success"}
+                employee={matchResult?.employee}
+                confidenceScore={matchResult?.confidenceScore}
+                message={
+                  scanStatus === "success"
+                    ? statusMessage === "Time In (Late)"
+                      ? "Face recognized. You have been marked as LATE based on your department schedule."
+                      : "Face matched enrolled biometric template instantly."
+                    : statusMessage === "Attendance Completed"
+                    ? "You have already completed your time in and time out today."
+                    : statusMessage === "Cooldown active. Wait 30s."
+                    ? "Your attendance was just recorded. Please wait a moment."
+                    : "User Not Found. Please ensure your face is enrolled in the system."
+                }
+                scanMode={activeMode}
+                onReset={handleResetTerminal}
+              />
+            ) : null}
           </div>
         </div>
       </div>
 
-      {/* Right: Biometric Verification Card */}
-      <div className="w-full lg:w-96 flex flex-col gap-5">
-        {/* Verification Result Card or Ready Prompt */}
-        <div className="glass-panel p-5 rounded-3xl border border-slate-800 flex-1 flex flex-col justify-center">
-          {scanStatus === "success" || scanStatus === "error" ? (
-            <EmployeeCard
-              success={scanStatus === "success"}
-              employee={matchResult?.employee}
-              confidenceScore={matchResult?.confidenceScore}
-              message={
-                scanStatus === "success"
-                  ? statusMessage === "Time In (Late)"
-                    ? "Face recognized. You have been marked as LATE based on your department schedule."
-                    : "Face matched enrolled biometric template instantly."
-                  : statusMessage === "Attendance Completed"
-                  ? "You have already completed your time in and time out today."
-                  : statusMessage === "Cooldown active. Wait 30s."
-                  ? "Your attendance was just recorded. Please wait a moment."
-                  : "User Not Found. Please ensure your face is enrolled in the system."
-              }
-              scanMode={activeMode}
-              onReset={handleResetTerminal}
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center text-center p-6 text-slate-500">
-              <div className="h-16 w-16 rounded-2xl bg-slate-900 border border-slate-800/80 flex items-center justify-center mb-3 text-slate-400">
-                <ScanFace className="h-8 w-8 stroke-[1.2]" />
-              </div>
-              <h4 className="text-sm font-semibold text-slate-300 mb-1">
-                Ready for Instant Punch
-              </h4>
-              <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
-                Step in front of the camera. Attendance is detected and confirmed in sub-second speed.
-              </p>
-            </div>
+      {/* Settings & Speed Controls Footer */}
+      <div className="glass-panel p-4 rounded-3xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Speed Preset Selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+            <Zap className="h-3.5 w-3.5 text-amber-400" /> Profiler:
+          </span>
+          <div className="flex items-center p-1 bg-slate-900 rounded-xl border border-slate-800 text-[11px]">
+            <button
+              onClick={() => setSpeedMode("TURBO")}
+              className={`px-3 py-1.5 rounded-lg font-bold transition ${
+                speedMode === "TURBO"
+                  ? "bg-emerald-500 text-slate-950 shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              ⚡ Turbo
+            </button>
+            <button
+              onClick={() => setSpeedMode("BALANCED")}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition ${
+                speedMode === "BALANCED"
+                  ? "bg-emerald-500 text-slate-950 shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              Balanced
+            </button>
+            <button
+              onClick={() => setSpeedMode("STRICT")}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition ${
+                speedMode === "STRICT"
+                  ? "bg-emerald-500 text-slate-950 shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              Strict
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setModelType(modelType === "tiny" ? "ssd" : "tiny")}
+            className="text-xs text-slate-400 hover:text-slate-200 font-mono transition"
+          >
+            Engine: <span className="text-emerald-400 font-bold">{modelType.toUpperCase()}</span>
+          </button>
+
+          {stream && (
+            <button
+              onClick={stopCamera}
+              className="text-xs text-rose-400 hover:text-rose-300 transition font-medium px-3 py-1.5 rounded-lg border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20"
+            >
+              Deactivate Camera
+            </button>
           )}
         </div>
       </div>

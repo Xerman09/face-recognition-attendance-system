@@ -234,17 +234,51 @@ export async function recordAttendance(
       const pad = (n: number) => n.toString().padStart(2, "0");
       const timeStrDb = `${todayDate.getFullYear()}-${pad(todayDate.getMonth()+1)}-${pad(todayDate.getDate())} ${pad(todayDate.getHours())}:${pad(todayDate.getMinutes())}:${pad(todayDate.getSeconds())}`;
 
+      let schedule: any = null;
+      try {
+        const schedRes = await fetch(`${DIRECTUS_URL}/items/department_schedule?filter[department_id][_eq]=${employee.department_id || 1}`, {
+          headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` },
+          cache: "no-store",
+        });
+        if (schedRes.ok) {
+          const schedJson = await schedRes.json();
+          if (schedJson.data && schedJson.data.length > 0) {
+            schedule = schedJson.data[0];
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to check department schedule", e);
+      }
+
       const checkRes = await fetch(`${DIRECTUS_URL}/items/attendance_log?filter[user_id][_eq]=${employee.id}&filter[log_date][_eq]=${logDateStr}`, {
         headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` },
         cache: "no-store",
       });
+      
       if (checkRes.ok) {
         const checkJson = await checkRes.json();
         const existing = checkJson.data && checkJson.data.length > 0 ? checkJson.data[0] : null;
 
         if (existing) {
+          let forceTimeOut = false;
+          if (schedule && schedule.work_end) {
+            const endParts = schedule.work_end.split(":");
+            const endDate = new Date(todayDate);
+            endDate.setHours(parseInt(endParts[0], 10), parseInt(endParts[1], 10), parseInt(endParts[2] || "0", 10), 0);
+            if (todayDate >= endDate) {
+              forceTimeOut = true;
+            }
+          }
+
           if (existing.time_out) {
             detectedMode = "ALREADY_COMPLETED";
+          } else if (forceTimeOut) {
+            detectedMode = "CLOCK_OUT";
+            await fetch(`${DIRECTUS_URL}/items/attendance_log/${existing.log_id}`, {
+              method: "PATCH",
+              headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ time_out: timeStrDb }),
+            }).catch((e: any) => console.warn(`Directus patch warning: ${e.message}`));
           } else if (!existing.lunch_start) {
             detectedMode = "LUNCH_START";
             await fetch(`${DIRECTUS_URL}/items/attendance_log/${existing.log_id}`, {
@@ -271,33 +305,16 @@ export async function recordAttendance(
           detectedMode = "CLOCK_IN";
           let punchStatus = "On Time";
           
-          try {
-            const schedRes = await fetch(`${DIRECTUS_URL}/items/department_schedule?filter[department_id][_eq]=${employee.department_id || 1}`, {
-              headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` },
-              cache: "no-store",
-            });
-            if (schedRes.ok) {
-              const schedJson = await schedRes.json();
-              if (schedJson.data && schedJson.data.length > 0) {
-                const sched = schedJson.data[0];
-                const workStartStr = sched.work_start;
-                const gracePeriod = sched.grace_period || 0;
-                
-                if (workStartStr) {
-                  const parts = workStartStr.split(":");
-                  const start = new Date(todayDate);
-                  start.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), parseInt(parts[2] || "0", 10), 0);
-                  start.setMinutes(start.getMinutes() + gracePeriod);
-                  
-                  if (todayDate > start) {
-                    punchStatus = "Late";
-                    isLate = true;
-                  }
-                }
-              }
+          if (schedule && schedule.work_start) {
+            const startParts = schedule.work_start.split(":");
+            const startDate = new Date(todayDate);
+            startDate.setHours(parseInt(startParts[0], 10), parseInt(startParts[1], 10), parseInt(startParts[2] || "0", 10), 0);
+            startDate.setMinutes(startDate.getMinutes() + (schedule.grace_period || 0));
+            
+            if (todayDate > startDate) {
+              punchStatus = "Late";
+              isLate = true;
             }
-          } catch (e) {
-            console.warn("Failed to check department schedule", e);
           }
 
           await fetch(`${DIRECTUS_URL}/items/attendance_log`, {
