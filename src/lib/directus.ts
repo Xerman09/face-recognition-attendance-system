@@ -211,8 +211,9 @@ export async function logScanAttempt(
  */
 export async function recordAttendance(
   employee: Employee
-): Promise<{ record: AttendanceRecord; mode: "CLOCK_IN" | "CLOCK_OUT" | "ALREADY_COMPLETED" }> {
+): Promise<{ record: AttendanceRecord; mode: "CLOCK_IN" | "CLOCK_OUT" | "ALREADY_COMPLETED"; isLate: boolean }> {
   let detectedMode: "CLOCK_IN" | "CLOCK_OUT" | "ALREADY_COMPLETED" = "CLOCK_IN";
+  let isLate = false;
   const today = new Date().toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -254,6 +255,37 @@ export async function recordAttendance(
           }
         } else {
           detectedMode = "CLOCK_IN";
+          let punchStatus = "On Time";
+          
+          try {
+            const schedRes = await fetch(`${DIRECTUS_URL}/items/department_schedule?filter[department_id][_eq]=${employee.department_id || 1}`, {
+              headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` },
+              cache: "no-store",
+            });
+            if (schedRes.ok) {
+              const schedJson = await schedRes.json();
+              if (schedJson.data && schedJson.data.length > 0) {
+                const sched = schedJson.data[0];
+                const workStartStr = sched.work_start;
+                const gracePeriod = sched.grace_period || 0;
+                
+                if (workStartStr) {
+                  const parts = workStartStr.split(":");
+                  const start = new Date(todayDate);
+                  start.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), parseInt(parts[2] || "0", 10), 0);
+                  start.setMinutes(start.getMinutes() + gracePeriod);
+                  
+                  if (todayDate > start) {
+                    punchStatus = "Late";
+                    isLate = true;
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            console.warn("Failed to check department schedule", e);
+          }
+
           await fetch(`${DIRECTUS_URL}/items/attendance_log`, {
               method: "POST",
               headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}`, "Content-Type": "application/json" },
@@ -262,10 +294,26 @@ export async function recordAttendance(
                 department_id: employee.department_id || 1,
                 log_date: logDateStr,
                 time_in: timeStrDb,
-                status: "On Time"
+                status: punchStatus
               }),
             }).catch((e: any) => console.warn(`Directus post warning: ${e.message}`));
         }
+
+        // Return early to bypass local storage fallback which might have stale data
+        return {
+          record: {
+            id: `att-${Date.now()}`,
+            userId: employee.id,
+            employeeName: `${employee.firstName} ${employee.lastName}`,
+            department: employee.department || "Staff",
+            avatarUrl: employee.avatarUrl,
+            date: today,
+            timeIn: timeStr,
+            status: isLate ? "LATE" : "PRESENT",
+          },
+          mode: detectedMode,
+          isLate
+        };
       }
     } catch (e: any) {
       console.warn(`Directus recordAttendance failed: ${e.message}`);
@@ -305,7 +353,7 @@ export async function recordAttendance(
     setLocal(LOCAL_STORAGE_KEY_ATTENDANCE, [updatedRecord, ...records]);
   }
 
-  return { record: updatedRecord, mode: detectedMode };
+  return { record: updatedRecord, mode: detectedMode, isLate };
 }
 
 /**

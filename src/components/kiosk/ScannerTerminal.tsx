@@ -332,7 +332,7 @@ export function ScannerTerminal({
           // Record punch in background and automatically determine mode
           if (result.employee) {
             recordAttendance(result.employee)
-              .then(({ mode }) => {
+              .then(({ mode, isLate }) => {
                 if (mode === "ALREADY_COMPLETED") {
                   setScanStatus("error");
                   setStatusMessage("Attendance Completed");
@@ -342,14 +342,24 @@ export function ScannerTerminal({
                   onScanCompleted();
                 } else {
                   setScanStatus("success");
-                  setStatusMessage("Access Granted");
+                  setStatusMessage(isLate ? "Time In (Late)" : "Access Granted");
                   soundFx.playSuccess();
+                  
+                  if (isLate) {
+                    toast.warning("You are LATE! Your time has been recorded.", {
+                      position: "top-center",
+                      duration: 5000,
+                    });
+                  }
+
                   try {
                     confetti({
                       particleCount: 80,
                       spread: 65,
                       origin: { y: 0.7 },
-                      colors: ["#10b981", "#34d399", "#06b6d4"],
+                      colors: isLate 
+                        ? ["#ef4444", "#f97316", "#f59e0b"] // Red, Orange, Amber for late
+                        : ["#10b981", "#34d399", "#06b6d4"], // Green, Teal for on time
                     });
                   } catch {}
 
