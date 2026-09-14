@@ -590,6 +590,8 @@ export function ScannerTerminal({
                   ? "Face matched enrolled biometric template instantly."
                   : statusMessage === "Attendance Completed"
                   ? "You have already completed your time in and time out today."
+                  : statusMessage === "Cooldown active. Wait 30s."
+                  ? "Your attendance was just recorded. Please wait a moment."
                   : "User Not Found. Please ensure your face is enrolled in the system."
               }
               scanMode={activeMode}
