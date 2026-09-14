@@ -1,0 +1,100 @@
+import { Employee, FaceBiometricRecord, FaceScanLog, AttendanceRecord } from "../types";
+
+export const INITIAL_EMPLOYEES: Employee[] = [
+  {
+    id: 101,
+    firstName: "Alexander",
+    lastName: "Wright",
+    email: "alexander.wright@company.com",
+    department: "Engineering & IT",
+    position: "Senior Systems Architect",
+    employeeNumber: "EMP-2024-001",
+    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+    isEnrolled: true,
+  },
+  {
+    id: 102,
+    firstName: "Elena",
+    lastName: "Rostova",
+    email: "elena.rostova@company.com",
+    department: "Human Resources",
+    position: "Talent Operations Lead",
+    employeeNumber: "EMP-2024-002",
+    avatarUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&auto=format&fit=crop&q=80",
+    isEnrolled: true,
+  },
+  {
+    id: 103,
+    firstName: "Marcus",
+    lastName: "Chen",
+    email: "marcus.chen@company.com",
+    department: "Executive Operations",
+    position: "Chief Technology Officer",
+    employeeNumber: "EMP-2024-003",
+    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80",
+    isEnrolled: true,
+  },
+  {
+    id: 104,
+    firstName: "Sofia",
+    lastName: "Alvarez",
+    email: "sofia.alvarez@company.com",
+    department: "Finance & Accounting",
+    position: "Senior Financial Analyst",
+    employeeNumber: "EMP-2024-004",
+    avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=80",
+    isEnrolled: false,
+  },
+];
+
+export const INITIAL_SCAN_LOGS: FaceScanLog[] = [
+  {
+    id: "log-1",
+    user_id: 101,
+    scan_status: "SUCCESS",
+    confidence_score: 0.28,
+    date_created: new Date(Date.now() - 3600000 * 2).toISOString(),
+    scan_type: "CLOCK_IN",
+    user: INITIAL_EMPLOYEES[0],
+  },
+  {
+    id: "log-2",
+    user_id: 102,
+    scan_status: "SUCCESS",
+    confidence_score: 0.31,
+    date_created: new Date(Date.now() - 3600000 * 1.5).toISOString(),
+    scan_type: "CLOCK_IN",
+    user: INITIAL_EMPLOYEES[1],
+  },
+  {
+    id: "log-3",
+    user_id: null,
+    scan_status: "FAILED",
+    confidence_score: null,
+    date_created: new Date(Date.now() - 3600000 * 0.8).toISOString(),
+    scan_type: "VERIFY",
+  },
+];
+
+export const INITIAL_ATTENDANCE: AttendanceRecord[] = [
+  {
+    id: "att-1",
+    userId: 101,
+    employeeName: "Alexander Wright",
+    department: "Engineering & IT",
+    avatarUrl: INITIAL_EMPLOYEES[0].avatarUrl,
+    date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    timeIn: "08:42 AM",
+    status: "PRESENT",
+  },
+  {
+    id: "att-2",
+    userId: 102,
+    employeeName: "Elena Rostova",
+    department: "Human Resources",
+    avatarUrl: INITIAL_EMPLOYEES[1].avatarUrl,
+    date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    timeIn: "08:58 AM",
+    status: "PRESENT",
+  },
+];
