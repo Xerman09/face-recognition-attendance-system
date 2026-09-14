@@ -211,8 +211,8 @@ export async function logScanAttempt(
  */
 export async function recordAttendance(
   employee: Employee
-): Promise<{ record: AttendanceRecord; mode: "CLOCK_IN" | "CLOCK_OUT" }> {
-  let detectedMode: "CLOCK_IN" | "CLOCK_OUT" = "CLOCK_IN";
+): Promise<{ record: AttendanceRecord; mode: "CLOCK_IN" | "CLOCK_OUT" | "ALREADY_COMPLETED" }> {
+  let detectedMode: "CLOCK_IN" | "CLOCK_OUT" | "ALREADY_COMPLETED" = "CLOCK_IN";
   const today = new Date().toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -242,12 +242,16 @@ export async function recordAttendance(
         const existing = checkJson.data && checkJson.data.length > 0 ? checkJson.data[0] : null;
 
         if (existing) {
-          detectedMode = "CLOCK_OUT";
-          await fetch(`${DIRECTUS_URL}/items/attendance_log/${existing.log_id}`, {
-            method: "PATCH",
-            headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ time_out: timeStrDb }),
-          }).catch((e: any) => console.warn(`Directus patch warning: ${e.message}`));
+          if (existing.time_out) {
+            detectedMode = "ALREADY_COMPLETED";
+          } else {
+            detectedMode = "CLOCK_OUT";
+            await fetch(`${DIRECTUS_URL}/items/attendance_log/${existing.log_id}`, {
+              method: "PATCH",
+              headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ time_out: timeStrDb }),
+            }).catch((e: any) => console.warn(`Directus patch warning: ${e.message}`));
+          }
         } else {
           detectedMode = "CLOCK_IN";
           await fetch(`${DIRECTUS_URL}/items/attendance_log`, {
@@ -274,13 +278,18 @@ export async function recordAttendance(
   let updatedRecord: AttendanceRecord;
 
   if (existingToday) {
-    detectedMode = "CLOCK_OUT";
-    existingToday.timeOut = timeStr;
-    updatedRecord = existingToday;
-    setLocal(
-      LOCAL_STORAGE_KEY_ATTENDANCE,
-      records.map((r) => (r.id === existingToday.id ? existingToday : r))
-    );
+    if (existingToday.timeOut) {
+      detectedMode = "ALREADY_COMPLETED";
+      updatedRecord = existingToday;
+    } else {
+      detectedMode = "CLOCK_OUT";
+      existingToday.timeOut = timeStr;
+      updatedRecord = existingToday;
+      setLocal(
+        LOCAL_STORAGE_KEY_ATTENDANCE,
+        records.map((r) => (r.id === existingToday.id ? existingToday : r))
+      );
+    }
   } else {
     detectedMode = "CLOCK_IN";
     updatedRecord = {

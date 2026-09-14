@@ -329,45 +329,54 @@ export function ScannerTerminal({
           }
           lastPunchMap.current.set(result.userId, now);
 
-          // MATCH SUCCESSFUL!
-          setScanStatus("success");
-          setStatusMessage("Access Granted");
-          soundFx.playSuccess();
-
-          // Confetti celebration
-          try {
-            confetti({
-              particleCount: 80,
-              spread: 65,
-              origin: { y: 0.7 },
-              colors: ["#10b981", "#34d399", "#06b6d4"],
-            });
-          } catch {}
-
           // Record punch in background and automatically determine mode
           if (result.employee) {
             recordAttendance(result.employee)
               .then(({ mode }) => {
-                logScanAttempt(
-                  result.userId!,
-                  "SUCCESS",
-                  result.distance,
-                  mode
-                ).catch((e: any) => console.warn(`Scan attempt network warning: ${e.message}`));
+                if (mode === "ALREADY_COMPLETED") {
+                  setScanStatus("error");
+                  setStatusMessage("Attendance Completed");
+                  soundFx.playError();
+                  setTimeout(() => handleResetTerminal(), 3500);
+                  logScanAttempt(result.userId!, "FAILED", result.distance, "CLOCK_IN").catch(() => {});
+                  onScanCompleted();
+                } else {
+                  setScanStatus("success");
+                  setStatusMessage("Access Granted");
+                  soundFx.playSuccess();
+                  try {
+                    confetti({
+                      particleCount: 80,
+                      spread: 65,
+                      origin: { y: 0.7 },
+                      colors: ["#10b981", "#34d399", "#06b6d4"],
+                    });
+                  } catch {}
+
+                  logScanAttempt(
+                    result.userId!,
+                    "SUCCESS",
+                    result.distance,
+                    mode
+                  ).catch((e: any) => console.warn(`Scan attempt network warning: ${e.message}`));
+                  
+                  onScanCompleted();
+                  setTimeout(() => handleResetTerminal(), 3500);
+                }
               })
-              .catch((e: any) => console.warn(`Record attendance network warning: ${e.message}`));
+              .catch((e: any) => {
+                console.warn(`Record attendance network warning: ${e.message}`);
+                setScanStatus("error");
+                setStatusMessage("Network Error");
+                soundFx.playError();
+                setTimeout(() => handleResetTerminal(), 3500);
+                onScanCompleted();
+              });
           }
-
-          onScanCompleted();
-
-          // Fast reset after 3.5 seconds
-          setTimeout(() => {
-            handleResetTerminal();
-          }, 3500);
         } else {
           // UNRECOGNIZED FACE
           setScanStatus("error");
-          setStatusMessage("Face Not Recognized");
+          setStatusMessage("User Not Found");
           soundFx.playError();
 
           logScanAttempt(
@@ -569,7 +578,9 @@ export function ScannerTerminal({
               message={
                 scanStatus === "success"
                   ? "Face matched enrolled biometric template instantly."
-                  : "No enrolled biometric vector matched this face (distance >= 0.55)."
+                  : statusMessage === "Attendance Completed"
+                  ? "You have already completed your time in and time out today."
+                  : "User Not Found. Please ensure your face is enrolled in the system."
               }
               scanMode={activeMode}
               onReset={handleResetTerminal}
