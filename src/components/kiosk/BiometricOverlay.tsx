@@ -38,8 +38,8 @@ export function BiometricOverlay({
         <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-laser shadow-[0_0_15px_#22d3ee] z-20" />
       )}
 
-      {/* Center Biometric Target Oval */}
-      <div className="relative w-64 h-80 sm:w-72 sm:h-96 flex items-center justify-center">
+      {/* Biometric Target Area */}
+      <div className="relative w-[85%] h-[85%] max-w-sm max-h-[28rem] flex items-center justify-center">
         {/* Animated outer ring */}
         <div
           className={`absolute inset-0 rounded-[48%] border-2 transition-all duration-300 ${getBorderColor()}`}
@@ -56,7 +56,7 @@ export function BiometricOverlay({
           <div className="flex flex-col items-center justify-center text-slate-400/60 animate-pulse">
             <ScanFace className="h-16 w-16 mb-2 stroke-[1.2]" />
             <span className="text-xs font-medium tracking-wide">
-              Center Face in Oval
+              Position Face in Frame
             </span>
           </div>
         )}

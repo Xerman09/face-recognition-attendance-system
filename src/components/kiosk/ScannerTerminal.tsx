@@ -217,18 +217,18 @@ export function ScannerTerminal({
         if (modelType === "tiny" && status.tinyFaceDetector) {
           detectorOptions = new faceapi.TinyFaceDetectorOptions({
             inputSize: 320,
-            scoreThreshold: 0.5,
+            scoreThreshold: 0.2,
           });
           useTiny = true;
         } else if (status.ssdMobilenetv1) {
           detectorOptions = new faceapi.SsdMobilenetv1Options({
-            minConfidence: 0.5, // fast threshold
+            minConfidence: 0.2, // fast threshold, lowered for other directions
           });
           useTiny = false;
         } else if (status.tinyFaceDetector) {
           detectorOptions = new faceapi.TinyFaceDetectorOptions({
             inputSize: 320,
-            scoreThreshold: 0.5,
+            scoreThreshold: 0.2,
           });
           useTiny = true;
         } else {
@@ -272,9 +272,25 @@ export function ScannerTerminal({
         const sample = livenessTrackerRef.current.addSample(leftEye, rightEye, nose);
         setLivenessVariance(sample.variance);
 
+        // If a printed image is detected (no variance over 15+ frames)
+        if (sample.isSpoof) {
+          setScanStatus("error");
+          setStatusMessage("Spoof Detected: Printed Image");
+          soundFx.playError();
+          logScanAttempt(null, "FAILED", 0, activeMode).catch(() => {});
+          onScanCompleted();
+          setTimeout(() => handleResetTerminal(), 3500);
+          return;
+        }
+
+        // If not verified yet, and we are not in TURBO mode (or we are in TURBO but waiting for 2 frames)
         if (!sample.isVerified && speedMode !== "TURBO") {
           setScanStatus("waiting_liveness");
           setStatusMessage("Analyzing Liveness...");
+          isProcessingRef.current = false;
+          return;
+        } else if (!sample.isVerified && speedMode === "TURBO" && sample.frameCount < 2) {
+          // Even in TURBO mode, wait for at least 2 frames to ensure it's not an immediate still image
           isProcessingRef.current = false;
           return;
         }
@@ -317,7 +333,7 @@ export function ScannerTerminal({
             recordAttendance(
               result.employee,
               activeMode === "CLOCK_OUT" ? "CLOCK_OUT" : "CLOCK_IN"
-            ).catch(console.error);
+            ).catch((e: any) => console.warn(`Record attendance network warning: ${e.message}`));
           }
 
           // Audit log in background
@@ -326,7 +342,7 @@ export function ScannerTerminal({
             "SUCCESS",
             result.distance,
             activeMode
-          ).catch(console.error);
+          ).catch((e: any) => console.warn(`Scan attempt network warning: ${e.message}`));
 
           onScanCompleted();
 
@@ -345,7 +361,7 @@ export function ScannerTerminal({
             "FAILED",
             result.distance,
             activeMode
-          ).catch(console.error);
+          ).catch((e: any) => console.warn(`Scan attempt network warning: ${e.message}`));
 
           onScanCompleted();
 

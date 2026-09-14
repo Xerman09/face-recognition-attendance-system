@@ -2,7 +2,7 @@ import { FaceBiometricRecord, FaceScanLog, Employee, AttendanceRecord } from "..
 import { INITIAL_EMPLOYEES, INITIAL_SCAN_LOGS, INITIAL_ATTENDANCE } from "./mockData";
 
 const DIRECTUS_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
-const DIRECTUS_TOKEN = process.env.DIRECTUS_STATIC_TOKEN;
+const DIRECTUS_TOKEN = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN;
 
 const LOCAL_STORAGE_KEY_BIOMETRICS = "face_kiosk_biometrics_v1";
 const LOCAL_STORAGE_KEY_LOGS = "face_kiosk_logs_v1";
@@ -40,28 +40,29 @@ export async function getEmployees(): Promise<Employee[]> {
   // Try Directus if token available
   if (DIRECTUS_URL && DIRECTUS_TOKEN) {
     try {
-      const res = await fetch(`${DIRECTUS_URL}/users?limit=-1`, {
+      const res = await fetch(`${DIRECTUS_URL}/items/user?limit=-1`, {
         headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` },
         cache: "no-store",
       });
       if (res.ok) {
         const json = await res.json();
-        const directusUsers = json.data || [];
-        if (directusUsers.length > 0) {
-          return directusUsers.map((u: any) => ({
-            id: u.id,
-            firstName: u.first_name || "Employee",
-            lastName: u.last_name || `#${u.id}`,
-            email: u.email || "",
-            department: u.title || "General Operations",
-            position: u.description || "Staff",
-            employeeNumber: `EMP-${u.id}`,
-            avatarUrl: u.avatar ? `${DIRECTUS_URL}/assets/${u.avatar}` : undefined,
+        const customUsers = json.data || [];
+        if (customUsers.length > 0) {
+          return customUsers.map((u: any) => ({
+            id: u.user_id,
+            firstName: u.user_fname || "Employee",
+            lastName: u.user_lname || `#${u.user_id}`,
+            email: u.user_email || "",
+            department: "Dept " + (u.user_department || "Unknown"),
+            department_id: u.user_department || 1,
+            position: u.user_position || "Staff",
+            employeeNumber: u.rf_id || `EMP-${u.user_id}`,
+            avatarUrl: u.user_image ? `http://goatedcodoer:8056${u.user_image}` : undefined,
           }));
         }
       }
-    } catch (e) {
-      console.warn("Directus fetch users failed, using local/mock store", e);
+    } catch (e: any) {
+      console.warn(`Directus fetch users failed: ${e.message}. Using local/mock store.`);
     }
   }
 
@@ -87,8 +88,8 @@ export async function getFaceBiometrics(): Promise<FaceBiometricRecord[]> {
         const json = await res.json();
         return json.data || [];
       }
-    } catch (e) {
-      console.warn("Directus fetch biometrics failed, using local fallback", e);
+    } catch (e: any) {
+      console.warn(`Directus fetch biometrics failed: ${e.message}. Using local fallback.`);
     }
   }
 
@@ -125,8 +126,8 @@ export async function saveFaceBiometric(
         const json = await res.json();
         return json.data;
       }
-    } catch (e) {
-      console.warn("Directus biometric post failed, storing locally", e);
+    } catch (e: any) {
+      console.warn(`Directus biometric post failed: ${e.message}. Storing locally.`);
     }
   }
 
@@ -191,9 +192,9 @@ export async function logScanAttempt(
           confidence_score: confidenceScore,
           scan_type: scanType,
         }),
-      }).catch(console.error);
-    } catch {
-      // Ignore network errors
+      }).catch((e: any) => console.warn(`Directus network warning: ${e.message}`));
+    } catch (e: any) {
+      console.warn(`Directus scan log post failed: ${e.message}. Storing locally.`);
     }
   }
 
@@ -224,6 +225,50 @@ export async function recordAttendance(
   });
 
   const records = getLocal<AttendanceRecord[]>(LOCAL_STORAGE_KEY_ATTENDANCE, INITIAL_ATTENDANCE);
+  
+  if (DIRECTUS_URL && DIRECTUS_TOKEN) {
+    try {
+      const todayDate = new Date();
+      const logDateStr = todayDate.toISOString().split("T")[0];
+      const pad = (n: number) => n.toString().padStart(2, "0");
+      const timeStrDb = `${todayDate.getFullYear()}-${pad(todayDate.getMonth()+1)}-${pad(todayDate.getDate())} ${pad(todayDate.getHours())}:${pad(todayDate.getMinutes())}:${pad(todayDate.getSeconds())}`;
+
+      const checkRes = await fetch(`${DIRECTUS_URL}/items/attendance_log?filter[user_id][_eq]=${employee.id}&filter[log_date][_eq]=${logDateStr}`, {
+        headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` },
+        cache: "no-store",
+      });
+      if (checkRes.ok) {
+        const checkJson = await checkRes.json();
+        const existing = checkJson.data && checkJson.data.length > 0 ? checkJson.data[0] : null;
+
+        if (existing) {
+          if (mode === "CLOCK_OUT") {
+            await fetch(`${DIRECTUS_URL}/items/attendance_log/${existing.log_id}`, {
+              method: "PATCH",
+              headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ time_out: timeStrDb }),
+            }).catch((e: any) => console.warn(`Directus patch warning: ${e.message}`));
+          }
+        } else {
+          if (mode === "CLOCK_IN") {
+            await fetch(`${DIRECTUS_URL}/items/attendance_log`, {
+              method: "POST",
+              headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                user_id: employee.id,
+                department_id: employee.department_id || 1,
+                log_date: logDateStr,
+                time_in: timeStrDb,
+                status: "On Time"
+              }),
+            }).catch((e: any) => console.warn(`Directus post warning: ${e.message}`));
+          }
+        }
+      }
+    } catch (e: any) {
+      console.warn(`Directus recordAttendance failed: ${e.message}`);
+    }
+  }
   const existingToday = records.find(
     (r) => r.userId === employee.id && r.date === today
   );

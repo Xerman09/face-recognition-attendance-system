@@ -61,12 +61,13 @@ export class LivenessTracker {
 
   public addSample(leftEye: Point, rightEye: Point, nose: Point): {
     isVerified: boolean;
+    isSpoof: boolean;
     variance: number;
     ratio: number;
     frameCount: number;
   } {
     if (this.verified) {
-      return { isVerified: true, variance: 0.002, ratio: 0, frameCount: this.ratios.length };
+      return { isVerified: true, isSpoof: false, variance: 0.002, ratio: 0, frameCount: this.ratios.length };
     }
 
     const ratio = calculateLivenessRatio(leftEye, rightEye, nose);
@@ -75,6 +76,7 @@ export class LivenessTracker {
     if (this.ratios.length < this.windowSize) {
       return {
         isVerified: false,
+        isSpoof: false,
         variance: 0,
         ratio,
         frameCount: this.ratios.length,
@@ -87,24 +89,28 @@ export class LivenessTracker {
     const max = Math.max(...recent);
     const variance = max - min;
 
-    // In TURBO mode, if variance >= threshold or 2 frames of natural presence
     if (variance >= this.varianceThreshold) {
       this.verified = true;
       return {
         isVerified: true,
+        isSpoof: false,
         variance,
         ratio,
         frameCount: this.ratios.length,
       };
     }
 
-    // Slide window
-    if (this.ratios.length > this.windowSize * 2) {
+    // SPOOF DETECTION: If the face is tracked for 15+ frames and variance is still below threshold, it's a static printed image
+    const isSpoof = this.ratios.length >= 15 && variance < this.varianceThreshold;
+
+    // Slide window (allow up to 20 frames for spoof detection buffer)
+    if (this.ratios.length > 20) {
       this.ratios.shift();
     }
 
     return {
       isVerified: false,
+      isSpoof,
       variance,
       ratio,
       frameCount: this.ratios.length,

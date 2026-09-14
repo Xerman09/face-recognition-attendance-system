@@ -95,7 +95,7 @@ export function FaceEnrollmentModal({
       const detection = await faceapi
         .detectSingleFace(
           videoRef.current,
-          new faceapi.SsdMobilenetv1Options({ minConfidence: 0.8 })
+          new faceapi.SsdMobilenetv1Options({ minConfidence: 0.3 })
         )
         .withFaceLandmarks()
         .withFaceDescriptor();
@@ -284,7 +284,7 @@ export function FaceEnrollmentModal({
                 />
                 {/* Visual Alignment Guide Oval */}
                 <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                  <div className="w-44 h-56 rounded-[48%] border-2 border-emerald-400/70 shadow-[0_0_20px_rgba(16,185,129,0.3)] animate-pulse" />
+                  <div className="w-[85%] h-[85%] max-w-sm rounded-[40%] border-2 border-emerald-400/70 shadow-[0_0_20px_rgba(16,185,129,0.3)] animate-pulse" />
                 </div>
               </>
             )}
