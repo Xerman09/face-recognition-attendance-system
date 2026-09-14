@@ -342,7 +342,14 @@ export function ScannerTerminal({
                   onScanCompleted();
                 } else {
                   setScanStatus("success");
-                  setStatusMessage(isLate ? "Time In (Late)" : "Access Granted");
+                  
+                  let msg = "Access Granted";
+                  if (mode === "CLOCK_IN") msg = isLate ? "Time In (Late)" : "Time In Successful";
+                  if (mode === "LUNCH_START") msg = "Lunch Start Recorded";
+                  if (mode === "LUNCH_END") msg = "Lunch End Recorded";
+                  if (mode === "CLOCK_OUT") msg = "Time Out Recorded";
+                  
+                  setStatusMessage(msg);
                   soundFx.playSuccess();
                   
                   if (isLate) {
@@ -587,7 +594,9 @@ export function ScannerTerminal({
               confidenceScore={matchResult?.confidenceScore}
               message={
                 scanStatus === "success"
-                  ? "Face matched enrolled biometric template instantly."
+                  ? statusMessage === "Time In (Late)"
+                    ? "Face recognized. You have been marked as LATE based on your department schedule."
+                    : "Face matched enrolled biometric template instantly."
                   : statusMessage === "Attendance Completed"
                   ? "You have already completed your time in and time out today."
                   : statusMessage === "Cooldown active. Wait 30s."

@@ -124,42 +124,6 @@ export function TerminalHeader({
           </div>
         </div>
 
-        {/* Center: Navigation Tabs */}
-        <nav className="flex items-center p-1 bg-slate-900/90 rounded-xl border border-slate-800/80 shadow-inner">
-          <button
-            onClick={() => onTabChange("kiosk")}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              activeTab === "kiosk"
-                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Terminal Kiosk
-          </button>
-          <button
-            onClick={() => onTabChange("logs")}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              activeTab === "logs"
-                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <History className="h-3.5 w-3.5" />
-            Attendance Logs
-          </button>
-          <button
-            onClick={() => onTabChange("directory")}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              activeTab === "directory"
-                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Users className="h-3.5 w-3.5" />
-            Personnel
-          </button>
-        </nav>
 
         {/* Right: Clock & Utility Controls */}
         <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">

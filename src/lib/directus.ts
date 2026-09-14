@@ -211,8 +211,8 @@ export async function logScanAttempt(
  */
 export async function recordAttendance(
   employee: Employee
-): Promise<{ record: AttendanceRecord; mode: "CLOCK_IN" | "CLOCK_OUT" | "ALREADY_COMPLETED"; isLate: boolean }> {
-  let detectedMode: "CLOCK_IN" | "CLOCK_OUT" | "ALREADY_COMPLETED" = "CLOCK_IN";
+): Promise<{ record: AttendanceRecord; mode: "CLOCK_IN" | "LUNCH_START" | "LUNCH_END" | "CLOCK_OUT" | "ALREADY_COMPLETED"; isLate: boolean }> {
+  let detectedMode: "CLOCK_IN" | "LUNCH_START" | "LUNCH_END" | "CLOCK_OUT" | "ALREADY_COMPLETED" = "CLOCK_IN";
   let isLate = false;
   const today = new Date().toLocaleDateString("en-US", {
     month: "short",
@@ -245,6 +245,20 @@ export async function recordAttendance(
         if (existing) {
           if (existing.time_out) {
             detectedMode = "ALREADY_COMPLETED";
+          } else if (!existing.lunch_start) {
+            detectedMode = "LUNCH_START";
+            await fetch(`${DIRECTUS_URL}/items/attendance_log/${existing.log_id}`, {
+              method: "PATCH",
+              headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ lunch_start: timeStrDb }),
+            }).catch((e: any) => console.warn(`Directus patch warning: ${e.message}`));
+          } else if (!existing.lunch_end) {
+            detectedMode = "LUNCH_END";
+            await fetch(`${DIRECTUS_URL}/items/attendance_log/${existing.log_id}`, {
+              method: "PATCH",
+              headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ lunch_end: timeStrDb }),
+            }).catch((e: any) => console.warn(`Directus patch warning: ${e.message}`));
           } else {
             detectedMode = "CLOCK_OUT";
             await fetch(`${DIRECTUS_URL}/items/attendance_log/${existing.log_id}`, {
