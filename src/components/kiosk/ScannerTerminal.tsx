@@ -69,9 +69,10 @@ export function ScannerTerminal({
   const isProcessingRef = useRef<boolean>(false);
   const livenessTrackerRef = useRef<LivenessTracker>(new LivenessTracker("TURBO"));
 
-  // In-memory biometric cache
+  // Biometric state references
   const biometricsRef = useRef<FaceBiometricRecord[]>([]);
   const employeesMapRef = useRef<Map<number, Employee>>(new Map());
+  const lastPunchMap = useRef<Map<number, number>>(new Map());
 
   // Update speed mode on tracker
   useEffect(() => {
@@ -313,6 +314,21 @@ export function ScannerTerminal({
         setMatchResult(result);
 
         if (result.matched && result.userId) {
+          // Check 30s cooldown
+          const now = Date.now();
+          const lastPunch = lastPunchMap.current.get(result.userId) || 0;
+          if (now - lastPunch < 30000) {
+            setScanStatus("error");
+            setStatusMessage("Cooldown active. Wait 30s.");
+            soundFx.playError();
+            
+            setTimeout(() => {
+              handleResetTerminal();
+            }, 2000);
+            return;
+          }
+          lastPunchMap.current.set(result.userId, now);
+
           // MATCH SUCCESSFUL!
           setScanStatus("success");
           setStatusMessage("Access Granted");
@@ -328,21 +344,19 @@ export function ScannerTerminal({
             });
           } catch {}
 
-          // Record punch in background
+          // Record punch in background and automatically determine mode
           if (result.employee) {
-            recordAttendance(
-              result.employee,
-              activeMode === "CLOCK_OUT" ? "CLOCK_OUT" : "CLOCK_IN"
-            ).catch((e: any) => console.warn(`Record attendance network warning: ${e.message}`));
+            recordAttendance(result.employee)
+              .then(({ mode }) => {
+                logScanAttempt(
+                  result.userId!,
+                  "SUCCESS",
+                  result.distance,
+                  mode
+                ).catch((e: any) => console.warn(`Scan attempt network warning: ${e.message}`));
+              })
+              .catch((e: any) => console.warn(`Record attendance network warning: ${e.message}`));
           }
-
-          // Audit log in background
-          logScanAttempt(
-            result.userId,
-            "SUCCESS",
-            result.distance,
-            activeMode
-          ).catch((e: any) => console.warn(`Scan attempt network warning: ${e.message}`));
 
           onScanCompleted();
 
@@ -443,11 +457,7 @@ export function ScannerTerminal({
               <span className="text-slate-200">
                 Mode:{" "}
                 <span className="text-emerald-400 font-bold">
-                  {activeMode === "CLOCK_IN"
-                    ? "Clock In (Time-In)"
-                    : activeMode === "CLOCK_OUT"
-                    ? "Clock Out (Time-Out)"
-                    : "Simulator (Test)"}
+                  Automatic (Smart Punch)
                 </span>
               </span>
             </div>
@@ -547,50 +557,8 @@ export function ScannerTerminal({
         </div>
       </div>
 
-      {/* Right: Mode Selector & Biometric Verification Card */}
+      {/* Right: Biometric Verification Card */}
       <div className="w-full lg:w-96 flex flex-col gap-5">
-        {/* Terminal Mode Selector */}
-        <div className="glass-panel p-4 rounded-3xl border border-slate-800">
-          <div className="text-xs font-semibold text-slate-400 mb-2.5">
-            Attendance Punch Mode
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              onClick={() => onModeChange("CLOCK_IN")}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 ${
-                activeMode === "CLOCK_IN"
-                  ? "bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20"
-                  : "bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800"
-              }`}
-            >
-              <span>Clock In</span>
-              <span className="text-[9px] font-normal opacity-75">Time-In</span>
-            </button>
-            <button
-              onClick={() => onModeChange("CLOCK_OUT")}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 ${
-                activeMode === "CLOCK_OUT"
-                  ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20"
-                  : "bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800"
-              }`}
-            >
-              <span>Clock Out</span>
-              <span className="text-[9px] font-normal opacity-75">Time-Out</span>
-            </button>
-            <button
-              onClick={() => onModeChange("VERIFY")}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 ${
-                activeMode === "VERIFY"
-                  ? "bg-purple-500 text-slate-950 shadow-md shadow-purple-500/20"
-                  : "bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800"
-              }`}
-            >
-              <span>Simulator</span>
-              <span className="text-[9px] font-normal opacity-75">Test Only</span>
-            </button>
-          </div>
-        </div>
-
         {/* Verification Result Card or Ready Prompt */}
         <div className="glass-panel p-5 rounded-3xl border border-slate-800 flex-1 flex flex-col justify-center">
           {scanStatus === "success" || scanStatus === "error" ? (

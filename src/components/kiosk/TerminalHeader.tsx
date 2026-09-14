@@ -19,8 +19,6 @@ import { ScanMode } from "@/types";
 
 interface TerminalHeaderProps {
   modelsLoaded: boolean;
-  activeMode: ScanMode;
-  onModeChange: (mode: ScanMode) => void;
   activeTab: "kiosk" | "logs" | "directory";
   onTabChange: (tab: "kiosk" | "logs" | "directory") => void;
   isStreaming: boolean;
@@ -28,8 +26,6 @@ interface TerminalHeaderProps {
 
 export function TerminalHeader({
   modelsLoaded,
-  activeMode,
-  onModeChange,
   activeTab,
   onTabChange,
   isStreaming,

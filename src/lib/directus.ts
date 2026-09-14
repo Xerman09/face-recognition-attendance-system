@@ -210,9 +210,9 @@ export async function logScanAttempt(
  * Record attendance punch
  */
 export async function recordAttendance(
-  employee: Employee,
-  mode: "CLOCK_IN" | "CLOCK_OUT"
-): Promise<AttendanceRecord> {
+  employee: Employee
+): Promise<{ record: AttendanceRecord; mode: "CLOCK_IN" | "CLOCK_OUT" }> {
+  let detectedMode: "CLOCK_IN" | "CLOCK_OUT" = "CLOCK_IN";
   const today = new Date().toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -242,16 +242,15 @@ export async function recordAttendance(
         const existing = checkJson.data && checkJson.data.length > 0 ? checkJson.data[0] : null;
 
         if (existing) {
-          if (mode === "CLOCK_OUT") {
-            await fetch(`${DIRECTUS_URL}/items/attendance_log/${existing.log_id}`, {
-              method: "PATCH",
-              headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}`, "Content-Type": "application/json" },
-              body: JSON.stringify({ time_out: timeStrDb }),
-            }).catch((e: any) => console.warn(`Directus patch warning: ${e.message}`));
-          }
+          detectedMode = "CLOCK_OUT";
+          await fetch(`${DIRECTUS_URL}/items/attendance_log/${existing.log_id}`, {
+            method: "PATCH",
+            headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ time_out: timeStrDb }),
+          }).catch((e: any) => console.warn(`Directus patch warning: ${e.message}`));
         } else {
-          if (mode === "CLOCK_IN") {
-            await fetch(`${DIRECTUS_URL}/items/attendance_log`, {
+          detectedMode = "CLOCK_IN";
+          await fetch(`${DIRECTUS_URL}/items/attendance_log`, {
               method: "POST",
               headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}`, "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -262,7 +261,6 @@ export async function recordAttendance(
                 status: "On Time"
               }),
             }).catch((e: any) => console.warn(`Directus post warning: ${e.message}`));
-          }
         }
       }
     } catch (e: any) {
@@ -276,15 +274,15 @@ export async function recordAttendance(
   let updatedRecord: AttendanceRecord;
 
   if (existingToday) {
-    if (mode === "CLOCK_OUT") {
-      existingToday.timeOut = timeStr;
-    }
+    detectedMode = "CLOCK_OUT";
+    existingToday.timeOut = timeStr;
     updatedRecord = existingToday;
     setLocal(
       LOCAL_STORAGE_KEY_ATTENDANCE,
       records.map((r) => (r.id === existingToday.id ? existingToday : r))
     );
   } else {
+    detectedMode = "CLOCK_IN";
     updatedRecord = {
       id: `att-${Date.now()}`,
       userId: employee.id,
@@ -298,7 +296,7 @@ export async function recordAttendance(
     setLocal(LOCAL_STORAGE_KEY_ATTENDANCE, [updatedRecord, ...records]);
   }
 
-  return updatedRecord;
+  return { record: updatedRecord, mode: detectedMode };
 }
 
 /**
