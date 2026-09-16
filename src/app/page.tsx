@@ -100,8 +100,8 @@ export default function HomePage() {
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
         <div className="max-w-4xl w-full">
           <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold text-white mb-2">Select Company Database</h1>
-            <p className="text-slate-400">Choose the organization to configure the biometric terminal.</p>
+            <h1 className="text-2xl font-semibold text-slate-100 mb-2">Select Database</h1>
+            <p className="text-sm text-slate-500">Choose an organization to configure the biometric terminal.</p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -109,22 +109,32 @@ export default function HomePage() {
               <button
                 key={entity.id}
                 onClick={() => handleSelectEntity(entity)}
-                className="glass-panel p-6 rounded-[2rem] border border-slate-800/80 hover:border-slate-700 transition-all group flex flex-col items-start text-left relative overflow-hidden"
+                className="group relative flex flex-col items-start p-5 rounded-xl bg-slate-900/40 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700 transition-all text-left"
               >
+                {/* Top Accent Line */}
                 <div 
-                  className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl -mr-16 -mt-16 opacity-20 transition-opacity group-hover:opacity-40 pointer-events-none"
-                  style={{ backgroundColor: entity.color }}
+                  className="absolute top-0 left-0 right-0 h-[2px] rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity" 
+                  style={{ backgroundColor: entity.color }} 
                 />
-                <div 
-                  className="h-12 w-12 rounded-2xl flex items-center justify-center mb-4 relative z-10 border shadow-lg"
-                  style={{ backgroundColor: `${entity.color}15`, borderColor: `${entity.color}40`, color: entity.color }}
-                >
-                  <Building2 className="h-6 w-6" />
+                
+                <div className="flex items-center gap-3 mb-3">
+                  <div 
+                    className="flex items-center justify-center h-10 w-10 rounded-lg border border-slate-800 bg-slate-950/50 shadow-sm"
+                  >
+                    <Building2 className="h-5 w-5" style={{ color: entity.color }} />
+                  </div>
+                  <h3 className="text-base font-medium text-slate-200 group-hover:text-white transition-colors">
+                    {entity.name}
+                  </h3>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-emerald-400 transition-colors">{entity.name}</h3>
-                <p className="text-xs text-slate-400 mb-6 flex-1">{entity.description || "Corporate Entity"}</p>
-                <div className="flex items-center text-xs font-semibold mt-auto" style={{ color: entity.color }}>
-                  Connect Terminal <ArrowRight className="h-3.5 w-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+                
+                <p className="text-sm text-slate-500 mb-5 flex-1 line-clamp-2">
+                  {entity.description || "Corporate Entity"}
+                </p>
+                
+                <div className="flex items-center text-xs font-medium text-slate-400 group-hover:text-slate-300 transition-colors mt-auto">
+                  <span>Connect to database</span>
+                  <ArrowRight className="h-3.5 w-3.5 ml-1.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                 </div>
               </button>
             ))}
@@ -180,9 +190,9 @@ export default function HomePage() {
       </main>
 
       {/* Footer Info */}
-      <footer className="w-full py-4 border-t border-slate-900 text-center text-xs text-slate-500">
+      <footer className="w-full py-3 border-t border-slate-900 text-center text-xs text-slate-600">
         <p>
-          {activeEntity.name} Biometric Access Terminal • Ultra-Fast AI Face Recognition & Passive Liveness Verification
+          {activeEntity.name} Biometric Terminal • Attendance Management System
         </p>
       </footer>
 

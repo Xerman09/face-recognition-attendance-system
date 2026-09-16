@@ -6,10 +6,8 @@ import {
   Camera,
   ScanFace,
   CheckCircle2,
-  AlertCircle,
   Loader2,
   RotateCcw,
-  Sparkles,
 } from "lucide-react";
 import * as faceapi from "face-api.js";
 import { Employee } from "@/types";
@@ -188,44 +186,44 @@ export function FaceEnrollmentModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-150">
+      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
-              <ScanFace className="h-5 w-5" />
+        <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <ScanFace className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Enroll Biometrics</h2>
-              <p className="text-xs text-slate-400">
-                Register a 128-D biometric face vector for attendance identification
+              <h2 className="text-sm font-semibold text-slate-100">Enroll Face Biometrics</h2>
+              <p className="text-[11px] text-slate-400">
+                Register a 128-D biometric vector for automated attendance matching
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-5">
+        <div className="p-5 overflow-y-auto space-y-4">
           {/* Employee Selection */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-300">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-300">
               Select Personnel
             </label>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-2.5">
               <select
                 value={selectedUserId}
                 onChange={(e) => {
                   const val = e.target.value;
                   setSelectedUserId(val === "new" ? "new" : Number(val));
                 }}
-                className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
               >
                 <option value="new">+ Register New Employee</option>
                 {employees.map((emp) => (
@@ -238,34 +236,34 @@ export function FaceEnrollmentModal({
             </div>
 
             {selectedUserId === "new" && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1.5">
                 <input
                   type="text"
                   placeholder="First Name"
                   value={newFirstName}
                   onChange={(e) => setNewFirstName(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                  className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
                 />
                 <input
                   type="text"
                   placeholder="Last Name"
                   value={newLastName}
                   onChange={(e) => setNewLastName(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                  className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
                 />
                 <input
                   type="text"
                   placeholder="Department"
                   value={newDepartment}
                   onChange={(e) => setNewDepartment(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                  className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
                 />
               </div>
             )}
           </div>
 
           {/* Camera / Snapshot Preview Container */}
-          <div className="relative aspect-video bg-black rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
+          <div className="relative aspect-video bg-black rounded-lg overflow-hidden border border-slate-800 flex items-center justify-center">
             {capturedSnapshot ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -282,39 +280,39 @@ export function FaceEnrollmentModal({
                   muted
                   className="w-full h-full object-cover"
                 />
-                {/* Visual Alignment Guide Oval */}
+                {/* Visual Alignment Guide */}
                 <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                  <div className="w-[85%] h-[85%] max-w-sm rounded-[40%] border-2 border-emerald-400/70 shadow-[0_0_20px_rgba(16,185,129,0.3)] animate-pulse" />
+                  <div className="w-[70%] h-[75%] max-w-xs rounded-xl border border-emerald-400/50" />
                 </div>
               </>
             )}
 
             {isCapturing && (
-              <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex flex-col items-center justify-center z-30">
-                <Loader2 className="h-10 w-10 text-emerald-400 animate-spin mb-2" />
-                <span className="text-xs font-semibold text-emerald-300">
-                  Computing 128-D Descriptor Vector...
+              <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center z-30">
+                <Loader2 className="h-8 w-8 text-emerald-400 animate-spin mb-2" />
+                <span className="text-xs font-medium text-emerald-300">
+                  Extracting biometric vector...
                 </span>
               </div>
             )}
           </div>
 
           {/* Capture Controls */}
-          <div className="flex items-center justify-between gap-3 pt-2">
+          <div className="flex items-center justify-between gap-2.5 pt-1">
             {!capturedSnapshot ? (
               <button
                 onClick={handleCapture}
                 disabled={isCapturing || !modelsLoaded}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 disabled:opacity-50 transition active:scale-[0.99]"
+                className="w-full py-2.5 px-4 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs flex items-center justify-center gap-2 disabled:opacity-50 transition"
               >
                 <Camera className="h-4 w-4" />
-                Capture Face & Extract Descriptor
+                Capture Face & Extract Vector
               </button>
             ) : (
-              <div className="w-full flex gap-3">
+              <div className="w-full flex gap-2.5">
                 <button
                   onClick={handleRetake}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition"
+                  className="flex-1 py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center justify-center gap-1.5 transition"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                   Retake Photo
@@ -322,14 +320,14 @@ export function FaceEnrollmentModal({
                 <button
                   onClick={handleSaveBiometric}
                   disabled={isSaving}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition disabled:opacity-50"
+                  className="flex-1 py-2 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs flex items-center justify-center gap-1.5 transition disabled:opacity-50"
                 >
                   {isSaving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <CheckCircle2 className="h-4 w-4" />
                   )}
-                  Confirm & Save Biometric
+                  Save Biometrics
                 </button>
               </div>
             )}

@@ -7,15 +7,12 @@ import {
   VolumeX,
   Maximize2,
   Minimize2,
-  ShieldCheck,
-  Radio,
   Users,
   History,
   ScanFace,
-  Sparkles,
+  ArrowLeft,
 } from "lucide-react";
 import { soundFx } from "@/lib/audio";
-import { ScanMode } from "@/types";
 
 interface TerminalHeaderProps {
   modelsLoaded: boolean;
@@ -84,99 +81,124 @@ export function TerminalHeader({
   };
 
   return (
-    <header className="w-full glass-panel border-b border-slate-800/80 px-4 py-3 sm:px-6">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Left: Brand & Status Pill */}
-        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-lg shadow-emerald-500/20 flex items-center justify-center">
-              <div className="h-full w-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <ScanFace className="h-5 w-5 text-emerald-400" />
-              </div>
+    <header className="w-full bg-slate-900 border-b border-slate-800 px-4 py-2.5 sm:px-6">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+        {/* Left: Brand & Organization */}
+        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+          <div className="flex items-center gap-2.5">
+            {onSwitchEntity && (
+              <button
+                onClick={onSwitchEntity}
+                title="Back to Database Selection"
+                className="p-1.5 -ml-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+            )}
+            <div className="h-8 w-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <ScanFace className="h-4 w-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold tracking-tight text-white text-base">
+                <span className="font-semibold text-slate-100 text-sm">
                   {activeEntityName || process.env.NEXT_PUBLIC_COMPANY_NAME || "UniHR Biometrics"}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  v2.0 Kiosk
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400 border border-slate-700/60">
+                  Terminal
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
-                Face Recognition Attendance Terminal
-              </p>
             </div>
           </div>
 
-          {/* Status Badge */}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-800 text-xs">
-            <Radio
-              className={`h-3 w-3 ${
-                isStreaming
-                  ? "text-emerald-400"
-                  : "text-slate-500"
+          {/* Status Indicator */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-950 border border-slate-800 text-xs text-slate-400">
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                isStreaming ? "bg-emerald-400" : modelsLoaded ? "bg-amber-400" : "bg-slate-600"
               }`}
             />
-            <span className="text-slate-300">
-              {modelsLoaded
-                ? isStreaming
-                  ? "Camera Online"
-                  : "AI Ready"
-                : "Loading Models..."}
+            <span className="text-[11px] font-medium">
+              {modelsLoaded ? (isStreaming ? "Active" : "Ready") : "Initializing..."}
             </span>
           </div>
         </div>
 
+        {/* Center: Navigation Segmented Control */}
+        <nav className="flex items-center p-1 bg-slate-950 rounded-lg border border-slate-800 text-xs">
+          <button
+            onClick={() => onTabChange("kiosk")}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-medium transition-colors ${
+              activeTab === "kiosk"
+                ? "bg-slate-800 text-slate-100 shadow-sm border border-slate-700/60"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <ScanFace className="h-3.5 w-3.5" />
+            <span>Kiosk</span>
+          </button>
+          <button
+            onClick={() => onTabChange("logs")}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-medium transition-colors ${
+              activeTab === "logs"
+                ? "bg-slate-800 text-slate-100 shadow-sm border border-slate-700/60"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <History className="h-3.5 w-3.5" />
+            <span>Attendance Logs</span>
+          </button>
+          <button
+            onClick={() => onTabChange("directory")}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-medium transition-colors ${
+              activeTab === "directory"
+                ? "bg-slate-800 text-slate-100 shadow-sm border border-slate-700/60"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Users className="h-3.5 w-3.5" />
+            <span>Personnel</span>
+          </button>
+        </nav>
 
-        {/* Right: Clock & Utility Controls */}
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+        {/* Right: Clock & Controls */}
+        <div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
           {/* Real-time Clock */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-right">
-            <Clock className="h-4 w-4 text-emerald-400" />
-            <div>
-              <div className="text-xs font-mono font-bold text-slate-100 leading-none">
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800">
+            <Clock className="h-3.5 w-3.5 text-slate-400" />
+            <div className="text-right">
+              <div className="text-xs font-mono font-medium text-slate-200 leading-none">
                 {timeStr || "--:--:--"}
               </div>
-              <div className="text-[10px] text-slate-400 leading-none mt-0.5">
+              <div className="text-[10px] text-slate-500 leading-none mt-0.5">
                 {dateStr || "Loading..."}
               </div>
             </div>
           </div>
 
           {/* Sound & Fullscreen controls */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button
               onClick={toggleSound}
               title={isMuted ? "Unmute Audio" : "Mute Audio"}
-              className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-100 transition-colors"
+              className="p-1.5 rounded-md bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
             >
               {isMuted ? (
-                <VolumeX className="h-4 w-4 text-rose-400" />
+                <VolumeX className="h-3.5 w-3.5 text-rose-400" />
               ) : (
-                <Volume2 className="h-4 w-4 text-emerald-400" />
+                <Volume2 className="h-3.5 w-3.5 text-slate-300" />
               )}
             </button>
             <button
               onClick={toggleFullscreen}
               title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Kiosk"}
-              className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-100 transition-colors"
+              className="p-1.5 rounded-md bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
             >
               {isFullscreen ? (
-                <Minimize2 className="h-4 w-4 text-slate-300" />
+                <Minimize2 className="h-3.5 w-3.5 text-slate-300" />
               ) : (
-                <Maximize2 className="h-4 w-4 text-slate-300" />
+                <Maximize2 className="h-3.5 w-3.5 text-slate-300" />
               )}
             </button>
-            {onSwitchEntity && (
-              <button
-                onClick={onSwitchEntity}
-                title="Switch Database"
-                className="p-2 ml-2 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/50 text-emerald-400 transition-colors"
-              >
-                <Users className="h-4 w-4" />
-              </button>
-            )}
           </div>
         </div>
       </div>

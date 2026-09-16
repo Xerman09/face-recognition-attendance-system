@@ -17,7 +17,6 @@ import {
   Sliders,
 } from "lucide-react";
 import * as faceapi from "face-api.js";
-import confetti from "canvas-confetti";
 import { Employee, FaceBiometricRecord, ScanMode, ScanStatus } from "@/types";
 import { BiometricOverlay } from "./BiometricOverlay";
 import { EmployeeCard } from "./EmployeeCard";
@@ -359,17 +358,6 @@ export function ScannerTerminal({
                     });
                   }
 
-                  try {
-                    confetti({
-                      particleCount: 80,
-                      spread: 65,
-                      origin: { y: 0.7 },
-                      colors: isLate 
-                        ? ["#ef4444", "#f97316", "#f59e0b"] // Red, Orange, Amber for late
-                        : ["#10b981", "#34d399", "#06b6d4"], // Green, Teal for on time
-                    });
-                  } catch {}
-
                   logScanAttempt(
                     result.userId!,
                     "SUCCESS",
@@ -417,28 +405,48 @@ export function ScannerTerminal({
     }, 45); // 45ms cycle (~22 FPS)
   };
 
+  // Auto-start camera when models are loaded
+  useEffect(() => {
+    let mounted = true;
+    if (modelsLoaded && !stream && !isProcessingRef.current) {
+      // Small delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        if (mounted && !stream) {
+          startCamera();
+        }
+      }, 100);
+      return () => {
+        clearTimeout(timer);
+        mounted = false;
+      };
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [modelsLoaded, stream, startCamera]);
+
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
+    <div className="w-full max-w-4xl mx-auto flex flex-col gap-4">
       {/* Main Camera & Biometric Viewport */}
-      <div className="w-full rounded-[2.5rem] overflow-hidden border border-slate-800/80 shadow-2xl relative bg-slate-950/50 aspect-[3/4] sm:aspect-video flex items-center justify-center">
+      <div className="w-full rounded-xl overflow-hidden border border-slate-800 relative bg-black aspect-[3/4] sm:aspect-video flex items-center justify-center">
         {/* Terminal Video Viewport */}
         <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden bg-black">
           {/* Inactive State Prompt */}
           {!stream && (
             <div className="flex flex-col items-center justify-center p-8 text-center z-10">
-              <div className="h-20 w-20 rounded-3xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 text-emerald-400 shadow-xl shadow-emerald-500/10">
-                <ScanFace className="h-10 w-10 stroke-[1.5]" />
+              <div className="h-14 w-14 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-3 text-emerald-400">
+                <ScanFace className="h-7 w-7" />
               </div>
-              <h3 className="text-base font-bold text-white mb-1">
+              <h3 className="text-sm font-semibold text-slate-100 mb-1">
                 Biometric Terminal Idle
               </h3>
-              <p className="text-xs text-slate-400 max-w-sm mb-6">
+              <p className="text-xs text-slate-400 max-w-sm mb-5">
                 Activate camera stream to begin instant facial recognition with single-pass AI inference.
               </p>
               <button
                 onClick={startCamera}
                 disabled={!modelsLoaded}
-                className="py-3 px-6 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/40 disabled:opacity-50 transition active:scale-[0.98]"
+                className="py-2.5 px-5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs flex items-center gap-2 disabled:opacity-50 transition"
               >
                 {!modelsLoaded ? (
                   <>
@@ -448,7 +456,7 @@ export function ScannerTerminal({
                 ) : (
                   <>
                     <Camera className="h-4 w-4" />
-                    Activate High-Speed Camera
+                    Activate Camera
                   </>
                 )}
               </button>
@@ -478,21 +486,16 @@ export function ScannerTerminal({
 
           {/* Active Mode Pill (Top Left of Camera) */}
           {stream && (
-            <div className="absolute top-4 left-4 z-30 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 backdrop-blur-md border border-slate-800/80 text-xs font-semibold">
-              <Zap className="h-3.5 w-3.5 text-emerald-400" />
-              <span className="text-slate-200">
-                Mode:{" "}
-                <span className="text-emerald-400 font-bold">
-                  Automatic (Smart Punch)
-                </span>
-              </span>
+            <div className="absolute top-3 left-3 z-30 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-950/90 border border-slate-800 text-[11px] font-medium text-slate-300">
+              <Zap className="h-3 w-3 text-emerald-400" />
+              <span>Smart Punch</span>
             </div>
           )}
 
-          {/* Live Latency & Speed Badge (Top Right of Camera) */}
+          {/* Live Latency & Device Selector (Top Right of Camera) */}
           {stream && (
-            <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
-              <div className="px-2.5 py-1 rounded-xl bg-slate-950/80 backdrop-blur-md border border-slate-800/80 text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
+            <div className="absolute top-3 right-3 z-30 flex items-center gap-2">
+              <div className="px-2 py-1 rounded-md bg-slate-950/90 border border-slate-800 text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
                 <Gauge className="h-3 w-3 text-emerald-400" />
                 <span>{inferenceTimeMs ? `${inferenceTimeMs}ms` : "Live"}</span>
               </div>
@@ -504,7 +507,7 @@ export function ScannerTerminal({
                     setSelectedDeviceId(e.target.value);
                     setTimeout(() => startCamera(), 100);
                   }}
-                  className="bg-slate-950/80 backdrop-blur-md border border-slate-800/80 text-slate-300 text-[11px] rounded-xl px-2.5 py-1 focus:outline-none focus:border-emerald-500"
+                  className="bg-slate-950/90 border border-slate-800 text-slate-300 text-[11px] rounded-md px-2 py-1 focus:outline-none focus:border-emerald-500"
                 >
                   {devices.map((d, i) => (
                     <option key={d.deviceId} value={d.deviceId}>
@@ -517,12 +520,12 @@ export function ScannerTerminal({
           )}
         </div>
 
-        {/* Overlay Result Sheet (Slides up like Apple Pay) */}
+        {/* Overlay Result Sheet */}
         <div
-          className={`absolute bottom-0 left-0 w-full z-40 transition-all duration-500 ease-out p-4 sm:p-8 flex justify-center pointer-events-none ${
+          className={`absolute bottom-0 left-0 w-full z-40 transition-all duration-300 ease-out p-4 flex justify-center pointer-events-none ${
             scanStatus === "success" || scanStatus === "error"
               ? "translate-y-0 opacity-100"
-              : "translate-y-8 opacity-0"
+              : "translate-y-4 opacity-0"
           }`}
         >
           <div className="w-full max-w-md pointer-events-auto">
@@ -534,13 +537,13 @@ export function ScannerTerminal({
                 message={
                   scanStatus === "success"
                     ? statusMessage === "Time In (Late)"
-                      ? "Face recognized. You have been marked as LATE based on your department schedule."
-                      : "Face matched enrolled biometric template instantly."
+                      ? "Face recognized. Marked as LATE per schedule."
+                      : "Face verified and attendance logged."
                     : statusMessage === "Attendance Completed"
-                    ? "You have already completed your time in and time out today."
+                    ? "Attendance already completed today."
                     : statusMessage === "Cooldown active. Wait 30s."
-                    ? "Your attendance was just recorded. Please wait a moment."
-                    : "User Not Found. Please ensure your face is enrolled in the system."
+                    ? "Cooldown active. Please wait a moment."
+                    : "User not recognized in system."
                 }
                 scanMode={activeMode}
                 onReset={handleResetTerminal}
@@ -550,40 +553,38 @@ export function ScannerTerminal({
         </div>
       </div>
 
-      {/* Settings & Speed Controls Footer */}
-      <div className="glass-panel p-4 rounded-3xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* Controls Strip */}
+      <div className="bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         {/* Speed Preset Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
-            <Zap className="h-3.5 w-3.5 text-amber-400" /> Profiler:
-          </span>
-          <div className="flex items-center p-1 bg-slate-900 rounded-xl border border-slate-800 text-[11px]">
+          <span className="text-slate-400 font-medium">Detection:</span>
+          <div className="flex items-center p-0.5 bg-slate-950 rounded-lg border border-slate-800 text-[11px]">
             <button
               onClick={() => setSpeedMode("TURBO")}
-              className={`px-3 py-1.5 rounded-lg font-bold transition ${
+              className={`px-2.5 py-1 rounded-md font-medium transition ${
                 speedMode === "TURBO"
-                  ? "bg-emerald-500 text-slate-950 shadow-sm"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-slate-800 text-slate-100 border border-slate-700/60"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
-              ⚡ Turbo
+              Turbo
             </button>
             <button
               onClick={() => setSpeedMode("BALANCED")}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition ${
+              className={`px-2.5 py-1 rounded-md font-medium transition ${
                 speedMode === "BALANCED"
-                  ? "bg-emerald-500 text-slate-950 shadow-sm"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-slate-800 text-slate-100 border border-slate-700/60"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               Balanced
             </button>
             <button
               onClick={() => setSpeedMode("STRICT")}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition ${
+              className={`px-2.5 py-1 rounded-md font-medium transition ${
                 speedMode === "STRICT"
-                  ? "bg-emerald-500 text-slate-950 shadow-sm"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-slate-800 text-slate-100 border border-slate-700/60"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               Strict
@@ -594,17 +595,17 @@ export function ScannerTerminal({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setModelType(modelType === "tiny" ? "ssd" : "tiny")}
-            className="text-xs text-slate-400 hover:text-slate-200 font-mono transition"
+            className="text-slate-400 hover:text-slate-200 font-mono transition text-[11px]"
           >
-            Engine: <span className="text-emerald-400 font-bold">{modelType.toUpperCase()}</span>
+            Engine: <span className="text-emerald-400 font-semibold">{modelType.toUpperCase()}</span>
           </button>
 
           {stream && (
             <button
               onClick={stopCamera}
-              className="text-xs text-rose-400 hover:text-rose-300 transition font-medium px-3 py-1.5 rounded-lg border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20"
+              className="text-xs text-rose-400 hover:text-rose-300 font-medium px-2.5 py-1 rounded-md border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 transition"
             >
-              Deactivate Camera
+              Stop Camera
             </button>
           )}
         </div>
