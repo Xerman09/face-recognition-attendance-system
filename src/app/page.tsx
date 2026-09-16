@@ -154,7 +154,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 light:bg-slate-50 light:text-slate-900 selection:bg-emerald-500/20 transition-colors">
+    <div className="h-screen max-h-screen overflow-hidden flex flex-col bg-slate-950 text-slate-100 light:bg-slate-50 light:text-slate-900 selection:bg-emerald-500/20 transition-colors">
       {/* Top Navigation & Status Bar */}
       <TerminalHeader
         modelsLoaded={modelsLoaded}
@@ -164,7 +164,7 @@ export default function HomePage() {
       />
 
       {/* Main Container - Dedicated Face Recognition Terminal */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+      <main className="flex-1 min-h-0 max-w-6xl w-full mx-auto p-2 sm:p-4 flex flex-col justify-center">
         <ScannerTerminal
           modelsLoaded={modelsLoaded}
           activeMode={activeMode}
@@ -175,7 +175,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer Info */}
-      <footer className="w-full py-3 border-t border-slate-900 light:border-slate-200 text-center text-xs text-slate-500 light:text-slate-600">
+      <footer className="w-full py-2 shrink-0 border-t border-slate-900 light:border-slate-200 text-center text-xs text-slate-500 light:text-slate-600">
         <p>
           {activeEntity.name} Biometric Terminal • Attendance Management System
         </p>

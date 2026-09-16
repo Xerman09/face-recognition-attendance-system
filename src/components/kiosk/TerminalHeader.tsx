@@ -79,7 +79,7 @@ export function TerminalHeader({
   };
 
   return (
-    <header className="w-full bg-slate-900 light:bg-white border-b border-slate-800 light:border-slate-200 px-4 py-2.5 sm:px-6 transition-colors">
+    <header className="w-full shrink-0 bg-slate-900 light:bg-white border-b border-slate-800 light:border-slate-200 px-4 py-2.5 sm:px-6 transition-colors">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
         {/* Left: Brand & Organization */}
         <div className="flex items-center gap-3">

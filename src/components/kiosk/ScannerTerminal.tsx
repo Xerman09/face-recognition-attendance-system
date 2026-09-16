@@ -426,9 +426,9 @@ export function ScannerTerminal({
   }, [modelsLoaded, stream, startCamera]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col gap-4">
+    <div className="w-full h-full max-w-5xl mx-auto flex flex-col gap-2.5 flex-1 min-h-0">
       {/* Main Camera & Biometric Viewport */}
-      <div className="w-full rounded-xl overflow-hidden border border-slate-800 light:border-slate-300 relative bg-black aspect-[3/4] sm:aspect-video max-h-[60vh] flex items-center justify-center">
+      <div className="w-full flex-1 min-h-0 rounded-xl overflow-hidden border border-slate-800 light:border-slate-300 relative bg-black flex items-center justify-center">
         {/* Terminal Video Viewport */}
         <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden bg-black">
           {/* Inactive State Prompt */}
@@ -554,7 +554,7 @@ export function ScannerTerminal({
       </div>
 
       {/* Controls Strip */}
-      <div className="bg-slate-900 light:bg-white px-4 py-2.5 rounded-xl border border-slate-800 light:border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs transition-colors">
+      <div className="shrink-0 bg-slate-900 light:bg-white px-4 py-2 sm:py-2.5 rounded-xl border border-slate-800 light:border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs transition-colors">
         {/* Speed Preset Selector */}
         <div className="flex items-center gap-2">
           <span className="text-slate-400 light:text-slate-500 font-medium">Detection:</span>
