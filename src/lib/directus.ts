@@ -1,8 +1,13 @@
 import { FaceBiometricRecord, FaceScanLog, Employee, AttendanceRecord, ScanMode } from "../types";
 import { INITIAL_EMPLOYEES, INITIAL_SCAN_LOGS, INITIAL_ATTENDANCE } from "./mockData";
 
-const DIRECTUS_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
-const DIRECTUS_TOKEN = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN;
+let DIRECTUS_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "";
+let DIRECTUS_TOKEN = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN || "";
+
+export function setDirectusConfig(url: string, token: string) {
+  DIRECTUS_URL = url;
+  DIRECTUS_TOKEN = token;
+}
 
 const LOCAL_STORAGE_KEY_BIOMETRICS = "face_kiosk_biometrics_v1";
 const LOCAL_STORAGE_KEY_LOGS = "face_kiosk_logs_v1";

@@ -53,3 +53,12 @@ export type ScanStatus =
   | "error";
 
 export type ScanMode = "CLOCK_IN" | "CLOCK_OUT" | "LUNCH_START" | "LUNCH_END" | "VERIFY";
+
+export interface EntityConfig {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  token: string;
+  color: string;
+}

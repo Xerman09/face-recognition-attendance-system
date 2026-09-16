@@ -22,6 +22,8 @@ interface TerminalHeaderProps {
   activeTab: "kiosk" | "logs" | "directory";
   onTabChange: (tab: "kiosk" | "logs" | "directory") => void;
   isStreaming: boolean;
+  activeEntityName?: string;
+  onSwitchEntity?: () => void;
 }
 
 export function TerminalHeader({
@@ -29,6 +31,8 @@ export function TerminalHeader({
   activeTab,
   onTabChange,
   isStreaming,
+  activeEntityName,
+  onSwitchEntity,
 }: TerminalHeaderProps) {
   const [timeStr, setTimeStr] = useState<string>("");
   const [dateStr, setDateStr] = useState<string>("");
@@ -93,7 +97,7 @@ export function TerminalHeader({
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold tracking-tight text-white text-base">
-                  {process.env.NEXT_PUBLIC_COMPANY_NAME || "UniHR Biometrics"}
+                  {activeEntityName || process.env.NEXT_PUBLIC_COMPANY_NAME || "UniHR Biometrics"}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   v2.0 Kiosk
@@ -164,6 +168,15 @@ export function TerminalHeader({
                 <Maximize2 className="h-4 w-4 text-slate-300" />
               )}
             </button>
+            {onSwitchEntity && (
+              <button
+                onClick={onSwitchEntity}
+                title="Switch Database"
+                className="p-2 ml-2 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/50 text-emerald-400 transition-colors"
+              >
+                <Users className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
       </div>
