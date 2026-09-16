@@ -7,8 +7,6 @@ import {
   VolumeX,
   Maximize2,
   Minimize2,
-  Users,
-  History,
   ScanFace,
   ArrowLeft,
 } from "lucide-react";
@@ -16,8 +14,8 @@ import { soundFx } from "@/lib/audio";
 
 interface TerminalHeaderProps {
   modelsLoaded: boolean;
-  activeTab: "kiosk" | "logs" | "directory";
-  onTabChange: (tab: "kiosk" | "logs" | "directory") => void;
+  activeTab?: string;
+  onTabChange?: (tab: any) => void;
   isStreaming: boolean;
   activeEntityName?: string;
   onSwitchEntity?: () => void;
@@ -25,8 +23,6 @@ interface TerminalHeaderProps {
 
 export function TerminalHeader({
   modelsLoaded,
-  activeTab,
-  onTabChange,
   isStreaming,
   activeEntityName,
   onSwitchEntity,
@@ -82,9 +78,9 @@ export function TerminalHeader({
 
   return (
     <header className="w-full bg-slate-900 border-b border-slate-800 px-4 py-2.5 sm:px-6">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
         {/* Left: Brand & Organization */}
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-2.5">
             {onSwitchEntity && (
               <button
@@ -123,45 +119,8 @@ export function TerminalHeader({
           </div>
         </div>
 
-        {/* Center: Navigation Segmented Control */}
-        <nav className="flex items-center p-1 bg-slate-950 rounded-lg border border-slate-800 text-xs">
-          <button
-            onClick={() => onTabChange("kiosk")}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-medium transition-colors ${
-              activeTab === "kiosk"
-                ? "bg-slate-800 text-slate-100 shadow-sm border border-slate-700/60"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <ScanFace className="h-3.5 w-3.5" />
-            <span>Kiosk</span>
-          </button>
-          <button
-            onClick={() => onTabChange("logs")}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-medium transition-colors ${
-              activeTab === "logs"
-                ? "bg-slate-800 text-slate-100 shadow-sm border border-slate-700/60"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <History className="h-3.5 w-3.5" />
-            <span>Attendance Logs</span>
-          </button>
-          <button
-            onClick={() => onTabChange("directory")}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-medium transition-colors ${
-              activeTab === "directory"
-                ? "bg-slate-800 text-slate-100 shadow-sm border border-slate-700/60"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Users className="h-3.5 w-3.5" />
-            <span>Personnel</span>
-          </button>
-        </nav>
-
         {/* Right: Clock & Controls */}
-        <div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
+        <div className="flex items-center gap-2.5">
           {/* Real-time Clock */}
           <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800">
             <Clock className="h-3.5 w-3.5 text-slate-400" />

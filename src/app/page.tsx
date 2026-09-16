@@ -3,8 +3,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { TerminalHeader } from "@/components/kiosk/TerminalHeader";
 import { ScannerTerminal } from "@/components/kiosk/ScannerTerminal";
-import { AttendanceLogsTable } from "@/components/logs/AttendanceLogsTable";
-import { PersonnelDirectory } from "@/components/directory/PersonnelDirectory";
 import { FaceEnrollmentModal } from "@/components/enrollment/FaceEnrollmentModal";
 import {
   getEmployees,
@@ -21,7 +19,6 @@ import { Building2, ArrowRight } from "lucide-react";
 export default function HomePage() {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [activeMode, setActiveMode] = useState<ScanMode>("CLOCK_IN");
-  const [activeTab, setActiveTab] = useState<"kiosk" | "logs" | "directory">("kiosk");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
 
@@ -155,38 +152,20 @@ export default function HomePage() {
       {/* Top Navigation & Status Bar */}
       <TerminalHeader
         modelsLoaded={modelsLoaded}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
         isStreaming={isStreaming}
         activeEntityName={activeEntity.name}
         onSwitchEntity={() => setActiveEntity(null)}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col">
-        {activeTab === "kiosk" && (
-          <ScannerTerminal
-            modelsLoaded={modelsLoaded}
-            activeMode={activeMode}
-            onModeChange={setActiveMode}
-            onScanCompleted={refreshData}
-            onStreamStateChange={setIsStreaming}
-          />
-        )}
-
-        {activeTab === "logs" && (
-          <AttendanceLogsTable
-            scanLogs={scanLogs}
-            attendanceRecords={attendanceRecords}
-          />
-        )}
-
-        {activeTab === "directory" && (
-          <PersonnelDirectory
-            employees={employees}
-            onOpenEnrollment={() => setIsEnrollmentOpen(true)}
-          />
-        )}
+      {/* Main Container - Dedicated Face Recognition Terminal */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+        <ScannerTerminal
+          modelsLoaded={modelsLoaded}
+          activeMode={activeMode}
+          onModeChange={setActiveMode}
+          onScanCompleted={refreshData}
+          onStreamStateChange={setIsStreaming}
+        />
       </main>
 
       {/* Footer Info */}
