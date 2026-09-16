@@ -15,6 +15,7 @@ import { Employee, FaceScanLog, AttendanceRecord, ScanMode, EntityConfig } from 
 import { toast } from "sonner";
 import { getEntities } from "./actions";
 import { Building2, ArrowRight } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default function HomePage() {
   const [modelsLoaded, setModelsLoaded] = useState(false);
@@ -94,11 +95,16 @@ export default function HomePage() {
   // If no entity is selected, show the selection screen
   if (!activeEntity) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-950 text-slate-100 light:bg-slate-50 light:text-slate-900 flex flex-col items-center justify-center p-4 relative transition-colors">
+        {/* Top-Right Theme Toggle */}
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+          <ThemeToggle />
+        </div>
+
         <div className="max-w-4xl w-full">
           <div className="text-center mb-10">
-            <h1 className="text-2xl font-semibold text-slate-100 mb-2">Select Database</h1>
-            <p className="text-sm text-slate-500">Choose an organization to configure the biometric terminal.</p>
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Select Database</h1>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Choose an organization to configure the biometric terminal.</p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -106,7 +112,7 @@ export default function HomePage() {
               <button
                 key={entity.id}
                 onClick={() => handleSelectEntity(entity)}
-                className="group relative flex flex-col items-start p-5 rounded-xl bg-slate-900/40 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700 transition-all text-left"
+                className="group relative flex flex-col items-start p-5 rounded-xl bg-white dark:bg-slate-900/40 hover:bg-slate-50 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm dark:shadow-none transition-all text-left"
               >
                 {/* Top Accent Line */}
                 <div 
@@ -116,20 +122,20 @@ export default function HomePage() {
                 
                 <div className="flex items-center gap-3 mb-3">
                   <div 
-                    className="flex items-center justify-center h-10 w-10 rounded-lg border border-slate-800 bg-slate-950/50 shadow-sm"
+                    className="flex items-center justify-center h-10 w-10 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/50 shadow-sm"
                   >
                     <Building2 className="h-5 w-5" style={{ color: entity.color }} />
                   </div>
-                  <h3 className="text-base font-medium text-slate-200 group-hover:text-white transition-colors">
+                  <h3 className="text-base font-medium text-slate-800 dark:text-slate-200 group-hover:text-black dark:group-hover:text-white transition-colors">
                     {entity.name}
                   </h3>
                 </div>
                 
-                <p className="text-sm text-slate-500 mb-5 flex-1 line-clamp-2">
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-5 flex-1 line-clamp-2">
                   {entity.description || "Corporate Entity"}
                 </p>
                 
-                <div className="flex items-center text-xs font-medium text-slate-400 group-hover:text-slate-300 transition-colors mt-auto">
+                <div className="flex items-center text-xs font-medium text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-300 transition-colors mt-auto">
                   <span>Connect to database</span>
                   <ArrowRight className="h-3.5 w-3.5 ml-1.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                 </div>
@@ -148,7 +154,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500/20">
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 light:bg-slate-50 light:text-slate-900 selection:bg-emerald-500/20 transition-colors">
       {/* Top Navigation & Status Bar */}
       <TerminalHeader
         modelsLoaded={modelsLoaded}
@@ -169,7 +175,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer Info */}
-      <footer className="w-full py-3 border-t border-slate-900 text-center text-xs text-slate-600">
+      <footer className="w-full py-3 border-t border-slate-900 light:border-slate-200 text-center text-xs text-slate-500 light:text-slate-600">
         <p>
           {activeEntity.name} Biometric Terminal • Attendance Management System
         </p>

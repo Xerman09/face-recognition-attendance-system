@@ -13,20 +13,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-slate-950 text-slate-100 selection:bg-emerald-500/30">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const storedTheme = localStorage.getItem('theme');
+                if (storedTheme === 'light') {
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.classList.add('light');
+                } else {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.classList.remove('light');
+                }
+              } catch (_) {}
+            `,
+          }}
+        />
+      </head>
+      <body className="min-h-screen bg-slate-950 text-slate-100 light:bg-slate-50 light:text-slate-900 selection:bg-emerald-500/30 transition-colors duration-200">
         {children}
         <Toaster
-          theme="dark"
           position="top-right"
           richColors
-          toastOptions={{
-            style: {
-              background: "#0f172a",
-              borderColor: "rgba(255, 255, 255, 0.1)",
-              color: "#f8fafc",
-            },
-          }}
         />
       </body>
     </html>

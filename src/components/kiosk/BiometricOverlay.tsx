@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ScanStatus } from "@/types";
-import { ScanFace, CheckCircle2, XCircle } from "lucide-react";
+import { ScanFace } from "lucide-react";
 
 interface BiometricOverlayProps {
   status: ScanStatus;
@@ -69,29 +69,9 @@ export function BiometricOverlay({
         {/* Status: Extracting & Matching */}
         {status === "scanning" && (
           <div className="absolute -bottom-12 flex flex-col items-center">
-            <div className="px-3 py-1 rounded-md bg-slate-900 border border-cyan-500/50 text-cyan-300 text-[11px] font-medium flex items-center gap-1.5">
+            <div className="px-3 py-1 rounded-md bg-slate-900 border border-cyan-500/50 text-cyan-300 text-[11px] font-medium flex items-center gap-1.5 shadow-md">
               <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
               Matching Face...
-            </div>
-          </div>
-        )}
-
-        {/* Status: Success Banner */}
-        {status === "success" && (
-          <div className="absolute -bottom-12 flex flex-col items-center">
-            <div className="px-3.5 py-1.5 rounded-md bg-slate-900 border border-emerald-500 text-emerald-300 text-xs font-semibold flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-              {message || "Face Verified"}
-            </div>
-          </div>
-        )}
-
-        {/* Status: Error Banner */}
-        {status === "error" && (
-          <div className="absolute -bottom-12 flex flex-col items-center">
-            <div className="px-3.5 py-1.5 rounded-md bg-slate-900 border border-rose-500 text-rose-300 text-xs font-semibold flex items-center gap-2">
-              <XCircle className="h-4 w-4 text-rose-400" />
-              {message || "Face Not Recognized"}
             </div>
           </div>
         )}

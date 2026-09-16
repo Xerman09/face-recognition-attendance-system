@@ -428,7 +428,7 @@ export function ScannerTerminal({
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col gap-4">
       {/* Main Camera & Biometric Viewport */}
-      <div className="w-full rounded-xl overflow-hidden border border-slate-800 relative bg-black aspect-[3/4] sm:aspect-video flex items-center justify-center">
+      <div className="w-full rounded-xl overflow-hidden border border-slate-800 light:border-slate-300 relative bg-black aspect-[3/4] sm:aspect-video max-h-[60vh] flex items-center justify-center">
         {/* Terminal Video Viewport */}
         <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden bg-black">
           {/* Inactive State Prompt */}
@@ -554,17 +554,17 @@ export function ScannerTerminal({
       </div>
 
       {/* Controls Strip */}
-      <div className="bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <div className="bg-slate-900 light:bg-white px-4 py-2.5 rounded-xl border border-slate-800 light:border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs transition-colors">
         {/* Speed Preset Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-slate-400 font-medium">Detection:</span>
-          <div className="flex items-center p-0.5 bg-slate-950 rounded-lg border border-slate-800 text-[11px]">
+          <span className="text-slate-400 light:text-slate-500 font-medium">Detection:</span>
+          <div className="flex items-center p-0.5 bg-slate-950 light:bg-slate-100 rounded-lg border border-slate-800 light:border-slate-200 text-[11px]">
             <button
               onClick={() => setSpeedMode("TURBO")}
               className={`px-2.5 py-1 rounded-md font-medium transition ${
                 speedMode === "TURBO"
-                  ? "bg-slate-800 text-slate-100 border border-slate-700/60"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-slate-800 light:bg-white text-slate-100 light:text-slate-900 border border-slate-700/60 light:border-slate-200 shadow-sm"
+                  : "text-slate-400 light:text-slate-500 hover:text-slate-200 light:hover:text-slate-900"
               }`}
             >
               Turbo
@@ -573,8 +573,8 @@ export function ScannerTerminal({
               onClick={() => setSpeedMode("BALANCED")}
               className={`px-2.5 py-1 rounded-md font-medium transition ${
                 speedMode === "BALANCED"
-                  ? "bg-slate-800 text-slate-100 border border-slate-700/60"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-slate-800 light:bg-white text-slate-100 light:text-slate-900 border border-slate-700/60 light:border-slate-200 shadow-sm"
+                  : "text-slate-400 light:text-slate-500 hover:text-slate-200 light:hover:text-slate-900"
               }`}
             >
               Balanced
@@ -583,8 +583,8 @@ export function ScannerTerminal({
               onClick={() => setSpeedMode("STRICT")}
               className={`px-2.5 py-1 rounded-md font-medium transition ${
                 speedMode === "STRICT"
-                  ? "bg-slate-800 text-slate-100 border border-slate-700/60"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-slate-800 light:bg-white text-slate-100 light:text-slate-900 border border-slate-700/60 light:border-slate-200 shadow-sm"
+                  : "text-slate-400 light:text-slate-500 hover:text-slate-200 light:hover:text-slate-900"
               }`}
             >
               Strict
@@ -595,15 +595,15 @@ export function ScannerTerminal({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setModelType(modelType === "tiny" ? "ssd" : "tiny")}
-            className="text-slate-400 hover:text-slate-200 font-mono transition text-[11px]"
+            className="text-slate-400 light:text-slate-500 hover:text-slate-200 light:hover:text-slate-900 font-mono transition text-[11px]"
           >
-            Engine: <span className="text-emerald-400 font-semibold">{modelType.toUpperCase()}</span>
+            Engine: <span className="text-emerald-400 light:text-emerald-600 font-semibold">{modelType.toUpperCase()}</span>
           </button>
 
           {stream && (
             <button
               onClick={stopCamera}
-              className="text-xs text-rose-400 hover:text-rose-300 font-medium px-2.5 py-1 rounded-md border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 transition"
+              className="text-xs text-rose-400 light:text-rose-600 hover:text-rose-300 light:hover:text-rose-700 font-medium px-2.5 py-1 rounded-md border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 transition"
             >
               Stop Camera
             </button>
