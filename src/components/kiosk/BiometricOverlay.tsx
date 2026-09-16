@@ -35,7 +35,7 @@ export function BiometricOverlay({
     <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center select-none overflow-hidden">
       {/* Laser Scanning Line when matching */}
       {status === "scanning" && (
-        <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-laser shadow-[0_0_15px_#22d3ee] z-20" />
+        <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_#22d3ee] z-20" />
       )}
 
       {/* Biometric Target Area */}
@@ -53,7 +53,7 @@ export function BiometricOverlay({
 
         {/* Center Reticle / Silhouette */}
         {status === "idle" && (
-          <div className="flex flex-col items-center justify-center text-slate-400/60 animate-pulse">
+          <div className="flex flex-col items-center justify-center text-slate-400/60">
             <ScanFace className="h-16 w-16 mb-2 stroke-[1.2]" />
             <span className="text-xs font-medium tracking-wide">
               Position Face in Frame
@@ -64,8 +64,8 @@ export function BiometricOverlay({
         {/* Status: Analyzing Liveness */}
         {status === "waiting_liveness" && (
           <div className="absolute -bottom-14 flex flex-col items-center">
-            <div className="px-4 py-1.5 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-semibold tracking-wider uppercase flex items-center gap-2 backdrop-blur-md animate-pulse">
-              <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+            <div className="px-4 py-1.5 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-semibold tracking-wider uppercase flex items-center gap-2 backdrop-blur-md">
+              <span className="h-2 w-2 rounded-full bg-amber-400" />
               Analyzing Liveness...
             </div>
             <div className="text-[10px] text-amber-200/80 mt-1 font-mono">
@@ -78,7 +78,7 @@ export function BiometricOverlay({
         {status === "scanning" && (
           <div className="absolute -bottom-14 flex flex-col items-center">
             <div className="px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-xs font-semibold tracking-wider uppercase flex items-center gap-2 backdrop-blur-md">
-              <span className="h-2 w-2 rounded-full bg-cyan-400 animate-ping" />
+              <span className="h-2 w-2 rounded-full bg-cyan-400" />
               Verifying Biometrics...
             </div>
             <div className="text-[10px] text-cyan-200/80 mt-1 font-mono">

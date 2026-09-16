@@ -37,7 +37,7 @@ export function EmployeeCard({
   };
 
   return (
-    <div className="w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-500 bg-slate-950/80 backdrop-blur-2xl rounded-3xl border border-slate-700/50 shadow-2xl p-2 sm:p-4">
+    <div className="w-full flex flex-col items-center bg-slate-950/80 backdrop-blur-2xl rounded-3xl border border-slate-700/50 shadow-2xl p-2 sm:p-4">
       {/* Result Status Banner */}
       <div
         className={`w-full p-4 rounded-2xl flex items-center justify-between border ${

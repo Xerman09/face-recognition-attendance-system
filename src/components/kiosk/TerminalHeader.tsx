@@ -87,7 +87,7 @@ export function TerminalHeader({
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-lg shadow-emerald-500/20 flex items-center justify-center">
               <div className="h-full w-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <ScanFace className="h-5 w-5 text-emerald-400 animate-pulse" />
+                <ScanFace className="h-5 w-5 text-emerald-400" />
               </div>
             </div>
             <div>
@@ -110,7 +110,7 @@ export function TerminalHeader({
             <Radio
               className={`h-3 w-3 ${
                 isStreaming
-                  ? "text-emerald-400 animate-ping"
+                  ? "text-emerald-400"
                   : "text-slate-500"
               }`}
             />
