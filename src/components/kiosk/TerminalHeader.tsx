@@ -93,7 +93,7 @@ export function TerminalHeader({
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold tracking-tight text-white text-base">
-                  UniHR Biometrics
+                  {process.env.NEXT_PUBLIC_COMPANY_NAME || "UniHR Biometrics"}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   v2.0 Kiosk
